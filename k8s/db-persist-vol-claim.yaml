@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  # In comparison to other kind of objects, the name here is key
+  # since it will be required from other kind of objects (Pods i.e.)
+  name: db-persist-vol-claim
+spec:
+  accessModes:
+    # this is required to set depending on the purpose of the PV
+    - ReadWriteOnce 
+  resources:
+    requests:
+      storage: 2Gi 

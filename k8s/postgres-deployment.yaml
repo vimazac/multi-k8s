@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1   
+  #since we are going to use a "volume" an extra config is required in case we wanna have more replicas
+  selector:
+    matchLabels:
+      component: postgres
+  template:
+    metadata:
+      labels:
+        component: postgres
+    spec:
+      volumes: #specify the volumes we want to ask to be available according to a config
+        - name: postgres-storage
+          persistentVolumeClaim:
+          #here goes the name specified in the vol-claim file
+            claimName: db-persist-vol-claim 
+      containers:
+        - name: postgres
+          image: postgres
+          ports:
+            - containerPort: 5432
+          volumeMounts: #take a volume and make it available inside this particular container
+            # this name has to match with the name specified before in the "volumes" section
+            # piece of storage used for this specific mount
+            - name: postgres-storage
+            # data directory that postgres uses to store data in the hard drive
+              mountPath: /var/lib/postgresql/data # default dir postgres uses
+              subPath: postgres # the path inside the volume where postgres data will be stored
+          env: 
+            # when the postgres image sees an env var called PGPASSWORD, is going to use that
+            # value instead of the default password.
+            - name: PGPASSWORD 
+              valueFrom: 
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
+
+
+    
